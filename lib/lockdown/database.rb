@@ -11,7 +11,7 @@ module Lockdown
         @user_groups = Lockdown::System.get_user_groups
 
         unless ::Permission.table_exists? && Lockdown.user_group_class.table_exists?
-          puts ">> Lockdown tables not found.  Skipping database sync."
+          puts ">> Lockdown tables not found.  Skipping database sync." if $rails_rake_task
           return
         end
         create_new_permissions
@@ -20,7 +20,7 @@ module Lockdown
       
         maintain_user_groups
       rescue Exception => e
-        puts ">> Lockdown sync failed: #{e}" 
+        puts ">> Lockdown sync failed: #{e}" if $rails_rake_task
       end
 
       # Create permissions not found in the database
@@ -30,7 +30,7 @@ module Lockdown
           str = Lockdown.get_string(key)
           p = ::Permission.find(:first, :conditions => ["name = ?", str])
           unless p
-            puts ">> Lockdown: Permission not found in db: #{str}, creating."
+            puts ">> Lockdown: Permission not found in db: #{str}, creating." if $rails_rake_task
             ::Permission.create(:name => str)
           end
         end
@@ -41,7 +41,7 @@ module Lockdown
         db_perms = ::Permission.find(:all).dup
         db_perms.each do |dbp|
           unless @permissions.include?(Lockdown.get_symbol(dbp.name))
-            puts ">> Lockdown: Permission no longer in init.rb: #{dbp.name}, deleting."
+            puts ">> Lockdown: Permission no longer in init.rb: #{dbp.name}, deleting." if $rails_rake_task
           ug_table = Lockdown.user_groups_hbtm_reference.to_s
           if "permissions" < ug_table
             join_table = "permissions_#{ug_table}"
@@ -71,7 +71,7 @@ module Lockdown
       end
 
       def create_user_group(name_str, key)
-        puts ">> Lockdown: #{Lockdown::System.fetch(:user_group_model)} not in the db: #{name_str}, creating."
+        puts ">> Lockdown: #{Lockdown::System.fetch(:user_group_model)} not in the db: #{name_str}, creating." if $rails_rake_task
         ug = Lockdown.user_group_class.create(:name => name_str)
         #Inefficient, definitely, but shouldn't have any issues across orms.
         Lockdown::System.permissions_for_user_group(key).each do |perm|
@@ -93,7 +93,7 @@ module Lockdown
           perm_sym = Lockdown.get_symbol(perm)
           perm_string = Lockdown.get_string(perm)
           unless Lockdown::System.permissions_for_user_group(key).include?(perm_sym)
-            puts ">> Lockdown: Permission: #{perm_string} no longer associated to User Group: #{ug.name}, deleting."
+            puts ">> Lockdown: Permission: #{perm_string} no longer associated to User Group: #{ug.name}, deleting." if $rails_rake_task
             ug.permissions.delete(perm)
           end
         end
@@ -109,7 +109,7 @@ module Lockdown
           end
           # if not found, add it
           unless found
-            puts ">> Lockdown: Permission: #{perm_string} not found for User Group: #{ug.name}, adding it."
+            puts ">> Lockdown: Permission: #{perm_string} not found for User Group: #{ug.name}, adding it." if $rails_rake_task
             p = ::Permission.find(:first, :conditions => ["name = ?", perm_string])
             ug.permissions << p
           end

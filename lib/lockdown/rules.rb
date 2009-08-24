@@ -336,7 +336,7 @@ module Lockdown
 
       method_definition << "\n\tend"
 
-      #puts "method_definition:\n #{method_definition}"
+      #puts "method_definition:\n #{method_definition}" if $rails_rake_task
 
       Lockdown.add_controller_method method_definition
     end

@@ -32,13 +32,13 @@ module Lockdown
       end
 
       if File.exists?(Lockdown.init_file)
-        puts "=> Requiring Lockdown rules engine: #{Lockdown.init_file} \n"
+        puts "=> Requiring Lockdown rules engine: #{Lockdown.init_file} \n" if $rails_rake_task
         require Lockdown.init_file
       else
-        puts "=> Note:: Lockdown couldn't find init file: #{Lockdown.init_file}\n"
+        puts "=> Note:: Lockdown couldn't find init file: #{Lockdown.init_file}\n" if $rails_rake_task
       end
     else
-      puts "=> Note:: Lockdown cannot determine framework and therefore is not active.\n"
+      puts "=> Note:: Lockdown cannot determine framework and therefore is not active.\n" if $rails_rake_task
     end
   end # mixin
 
@@ -66,7 +66,7 @@ require File.join("lockdown", "database")
 require File.join("lockdown", "rules")
 require File.join("lockdown", "system")
 
-puts "=> Mixing in Lockdown version: #{Lockdown.version} \n"
+puts "=> Mixing in Lockdown version: #{Lockdown.version} \n" if $rails_rake_task
 
 Lockdown.mixin
 
